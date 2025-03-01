@@ -1,6 +1,5 @@
 const mongoose = require('mongoose');
-const User = require('./user');
-const Product = require('./product');
+
 
 
 const cartSchema = new mongoose.Schema({
@@ -16,27 +15,23 @@ const cartSchema = new mongoose.Schema({
             quantity: { type: Number, min: 1, required: true },
         }
     ],
-    totalPrice: {
-        type: Number
-    }
-}, { timestamps: true });
 
+}, { timestamps: true , toJSON: { virtuals: true }, toObject: { virtuals: true }});
 
-cartSchema.pre(/^find/, async function (next) {
-    console.log(this.totalPrice);
-    
-    this.populate('cartItems.productId', 'price discount finalPrice');
+// vivrtual calculating the final price 
+cartSchema.virtual('totalPrice').get(function () {
+    if (!this.cartItems) return 0;
+    return this.cartItems.reduce((sum, item) => {
+        return sum + (item.productId?.finalPrice ?? 0) * item.quantity;
+    }, 0);
+});
+
+// Pre-find hook to populate `cartItems.productId` with `finalPrice price discount`
+cartSchema.pre(/^find/, function (next) {
+    this.populate('cartItems.productId', 'finalPrice price discount name'); // Ensures `finalPrice` is available
     next();
 });
-cartSchema.pre('save', async function (next) {
-    await this.populate("cartItems.productId", "price finalPrice");
-    // get the cartItems , productid , quantity*price
-    let totalPrice = 0;
-    this.cartItems.forEach(item => {
-        totalPrice += item.productId.finalPrice * item.quantity;
-    })
-    this.totalPrice = totalPrice;
-    next();
-})
+
+
 const Cart = mongoose.model('Cart', cartSchema);
 module.exports = Cart;

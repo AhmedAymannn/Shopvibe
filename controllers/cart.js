@@ -18,7 +18,7 @@ exports.getAllCarts = async (req, res)=>{
 }
 exports.getMyCart = async (req, res) => {
     try {
-        const cart = await Cart.findOne({ user: req.user._id }).populate("cartItems.productId", "name price");
+        const cart = await Cart.findOne({ user: req.user._id });
         const data = {
             totalItems: cart.cartItems.length,
             totalPrice: cart.totalPrice || 0, 
@@ -26,12 +26,13 @@ exports.getMyCart = async (req, res) => {
                 productId: item.productId._id,
                 name: item.productId.name,
                 price: item.productId.price,
+                discount : item.productId.discount,
+                finalPrice : item.productId.finalPrice,
                 quantity: item.quantity,
-                subtotal: item.productId.price * item.quantity
+                subtotal: item.productId.finalPrice * item.quantity
             }))
         };
         responses.ok(res, data);
-
     } catch (error) {
         responses.serverError(res, error)
     }
