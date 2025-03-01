@@ -1,14 +1,11 @@
 const Product = require('../models/product');
 const fs = require('fs');
 const path = require('path');
+const responsese = require('../utils/responses')
 exports.getProducts = async (req, res) => {
     try {
         const products = await Product.find().select("-__v");
-        if (!products) {
-            return res.status(200).json({
-                message: 'No products'
-            })
-        }
+        if (!products) return responsese.notFound(res , `product notFound`)
         res.status(201).json({
             status: 'success',
             result: products.length,
@@ -108,7 +105,6 @@ exports.updateProduct = async (req, res) => {
 
 exports.deleteProduct = async (req, res) => {
     try {
-
         const product = await Product.findByIdAndDelete(req.params.id)
         if (!product) {
             return res.status(400).json({

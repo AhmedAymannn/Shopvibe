@@ -15,15 +15,29 @@ const productSchema = new mongoose.Schema({
     category: { type: mongoose.Schema.Types.ObjectId, ref: 'Category', required: true }
 }, { timestamps: true });
 
+// calculate the finalPrice before saving 
 productSchema.pre('save', function (next) {
-    console.log(`from product model ${this.finalPrice}`);
-    
     if (this.discount && this.discount > 0) {
         this.finalPrice = this.price - (this.price * this.discount / 100);
     } else {
         this.finalPrice = this.price; // No discount applied
     }
+    console.log(`from product pre save hook ${this.finalPrice}`);
     next();
+});
+// calculate the finalPrice after updateOne
+productSchema.pre('findOneAndUpdate',async  function (next) {
+    let result = this.getUpdate();
+    if (!result.price && !result.discount) return next();
+    console.log("Before Modification:" ,result);
+    const product =await  Product.findOne(this.getQuery());
+    if(!product) return next();
+    const newPrice = result.price ?? product.price; ;
+    const newDiscount = result.discount ?? product.discount;
+    result.finalPrice = newPrice - (newPrice * (newDiscount / 100));
+    console.log("After Modification:", result);
+    next();
+    
 });
 
 const Product = mongoose.model('Product', productSchema);
