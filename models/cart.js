@@ -1,7 +1,4 @@
 const mongoose = require('mongoose');
-
-
-
 const cartSchema = new mongoose.Schema({
     user: {
         type: mongoose.Schema.Types.ObjectId,
@@ -17,7 +14,6 @@ const cartSchema = new mongoose.Schema({
     ],
 
 }, { timestamps: true , toJSON: { virtuals: true }, toObject: { virtuals: true }});
-
 // vivrtual calculating the final price 
 cartSchema.virtual('totalPrice').get(function () {
     if (!this.cartItems) return 0;
