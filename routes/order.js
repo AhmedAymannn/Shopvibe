@@ -11,3 +11,6 @@ router.route('/:id')
     .get(orderController.getOrder)
     .patch(orderController.updateMyOrder)
     .delete(orderController.cancelMyOrder)
+
+
+module.exports = router
