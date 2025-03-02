@@ -8,13 +8,6 @@ exports.createOrder = async (userId, body, res) => {
         if (!orderItems?.length || !shippingAddress || !payment?.method) {
             return responses.badRequest(res, 'complete the body ');
         }
-        const productsIds = [];
-        for (const product of orderItems) {
-            const productId = product.productId
-            productsIds.push(productId); 
-        }
-        const products = await Product.find({_id : { $in: productsIds }});
-        if(!products.length) return responses.notFound(res , 'Products in Order is not not found');
         const order = await Order.create({
             user: userId,
             orderItems,
@@ -23,6 +16,8 @@ exports.createOrder = async (userId, body, res) => {
         });
         responses.created(res, `Order Created successfully`, { order });
     } catch (error) {
+        console.log(error);
+        
         responses.serverError(res, error);
     }
 }
@@ -30,7 +25,7 @@ exports.getMyOrders = async (userId, res) => {
     try {
         const orders = await Order.find({ user: userId });
         if (!orders) return responses.notFound(res, 'You Dont Have Orders');
-        responses.ok(res, `${req.user.name} Orders`, { orders });
+        responses.ok(res, ` Orders`, { "Result":orders.length , orders });
     } catch (error) {
         responses.serverError(res, error);
     }
