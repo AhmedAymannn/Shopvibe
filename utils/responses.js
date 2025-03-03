@@ -42,7 +42,7 @@ module.exports = {
         })
     },
     conflict : (res, message) => {
-        res.status(409 ).json({
+        res.status(409).json({
             status : 'failed',
             message
         });
