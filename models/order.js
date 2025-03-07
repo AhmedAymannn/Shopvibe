@@ -14,7 +14,7 @@ const orderSchema = new mongoose.Schema({
         default: "Pending"
     },
     payment: {
-        method: { type: String, enum: ["COD", "Credit Card", "PayPal"], required: true },
+        method: { type: String, enum: ["card", "paypal"], required: true },
         status: { type: String, enum: ["Pending", "Paid", "Failed", "Refunded"], default: "Pending" },
     },
     deliveredAt: { type: Date }, // dynamiclly
@@ -26,7 +26,8 @@ const orderSchema = new mongoose.Schema({
             productId: { type: mongoose.Schema.Types.ObjectId, ref: "Product", required: true },
             name: { type: String },  // Store product name at purchase time
             price: { type: Number }, // Store final price at purchase time
-            quantity: { type: Number, min: 1, default: 1 }
+            quantity: { type: Number, min: 1, default: 1 },
+            description : {type: String }
         }
     ],
 },
@@ -44,7 +45,8 @@ orderSchema.pre('save', async function (next) {
         this.orderItems.forEach(item => {
             if (product._id.toString() === item.productId.toString()) {
                 item.name = product.name
-                item.price = product.finalPrice
+                item.price = product.finalPrice,
+                item.description = product.description
             }
         });
     });
