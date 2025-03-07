@@ -22,7 +22,8 @@ router.route('/signUp')
     .post(authController.SignUp)
 router.route('/login')
     .post(authController.login);
-
+router.route('/logout')
+    .post(authMiddleware.protectWithHeaders,authController.logOut);
 router.route('/forgotPassword')
     .post(authController.forgotPassword);
 router.route('/resetPassword/:token')

@@ -12,13 +12,12 @@ exports.createOrder = async (userId, body, res) => {
             user: userId,
             orderItems,
             shippingAddress,
-            payment: { method: payment.method }
+            payment: { method: payment.method },
         });
         responses.created(res, `Order Created successfully`, { order });
     } catch (error) {
         console.log(error);
-        
-        responses.serverError(res, error);
+        return { error: error.message };
     }
 }
 exports.getMyOrders = async (userId, res) => {
@@ -27,7 +26,7 @@ exports.getMyOrders = async (userId, res) => {
         if (!orders) return responses.notFound(res, 'You Dont Have Orders');
         responses.ok(res, ` Orders`, { "Result":orders.length , orders });
     } catch (error) {
-        responses.serverError(res, error);
+        return { error: error.message };
     }
 }
 // admins only 
@@ -36,7 +35,7 @@ exports.getAllOrders = async (res) => {
         const orders = await Order.find();
         responses.ok(res, 'All Orders', { orders })
     } catch (error) {
-        responses.serverError(res, error);
+        return { error: error.message };
     }
 }
 // Get a specific order by ID (only if the user owns it) 
@@ -47,7 +46,7 @@ exports.getOrder = async (userId, orderId, res) => {
         if (!order) return responses.notFound(res, 'order not found');
         responses.ok(res, 'Order Deails', { order })
     } catch (error) {
-        responses.serverError(res, error);
+        return { error: error.message };
     }
 }
 // Update shipping address (only if Pending)
@@ -66,7 +65,7 @@ exports.updateMyOrder = async (userId, orderId, body, res) => {
         await order.save();
         responses.ok(res, 'Order Updated');
     } catch (error) {
-        responses.serverError(res, error);
+        return { error: error.message };
     }
 }
 // Cancel an order (only if Pending/Processing)
@@ -82,6 +81,6 @@ exports.cancelMyOrder = async (userId, orderId, res) => {
         await order.deleteOne();
         responses.ok(res, 'order canceled successfully');
     } catch (error) {
-        responses.serverError(res, error);
+        return { error: error.message };
     }
 }

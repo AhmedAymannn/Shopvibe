@@ -11,6 +11,7 @@ const categoryRoutes = require('./routes/category');
 const reviewRoutes = require('./routes/review');
 const orderRoutes = require('./routes/order');
 const brandRoutes = require('./routes/brand');
+const checkoutRoutes = require ('./routes/payment');
 const cookieParser = require('cookie-parser');
 const Db_connection = require('./config/db')
 //middleweres
@@ -25,6 +26,7 @@ app.use('/api/v1/ecommerce/categories', categoryRoutes);
 app.use('/api/v1/ecommerce/reviews', reviewRoutes);
 app.use('/api/v1/ecommerce/orders', orderRoutes);
 app.use('/api/v1/ecommerce/brands', brandRoutes);
+app.use('/api/v1/ecommerce/checkout', checkoutRoutes);
 Db_connection.connectDB();
 app.listen(port, () => {
     console.log('server is running on port 3000');
