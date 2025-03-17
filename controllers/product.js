@@ -1,201 +1,75 @@
 const Product = require('../models/product');
 const fs = require('fs');
 const path = require('path');
-const responsese = require('../utils/responses')
+const responses = require('../utils/responses');
+const productService = require('../services/productService')
 exports.getProducts = async (req, res) => {
     try {
-        const products = await Product.find().select("-__v");
-        if (!products) return responsese.notFound(res , `product notFound`)
-        res.status(201).json({
-            status: 'success',
-            result: products.length,
-            Data: {
-                products
-            }
-        })
+        const products = await productService.getProducts();
+        responses.ok(res, ` All Products`, { result: products.length, products })
     } catch (error) {
-        res.status(500).json({
-            message: error.message
-        })
+        responses.serverError(res, error);
     }
 }
 exports.getProduct = async (req, res) => {
     try {
-        const productId = req.params.id;
-        if (!productId) {
-            return res.status(400).json({
-                status: "error",
-                message: "Product id is required"
-            })
-        }
-        const product = await Product.findById(productId).select("-__v");
-        if (!product) {
-            return res.status(404).json({
-                message: "Product not found"
-            })
-        }
-        res.status(200).json({
-            status: 'success',
-            Data: {
-                product
-            }
-        })
+        if (!req.params.id) return responses.badRequest(res, 'Product Id paramater is required')
+        const product = await productService.getProduct(req.params.id);
+        responses.ok(res, `product ${product.name}`, { product });
     } catch (error) {
-        res.status(500).json({
-            message: error.message
-        })
+        responses.serverError(res, error);
     }
 }
 exports.addProduct = async (req, res) => {
     try {
-        const productData = req.body;
-        if (!productData) {
-            return res.status(400).json({
-                status: 'faild',
-                message: ' provid the product data to add'
-            })
+        if(!req.body) return responses.badRequest(res , 'Bad Request');
+        try {
+            req.body.specifications = JSON.parse(req.body.specifications);
+        } catch (error) {
+            return responses.badRequest(res, 'Invalid specifications format. Ensure it is valid JSON.');
         }
-        const product = await Product.create(productData);
-        if (!product) {
-            return res.status(400).json({
-                status: 'faild',
-                message: ' product did not added'
-            })
-        }
-        res.status(201).json({
-            status: 'success',
-            Data: {
-                product
-            }
-        })
+        const coverImageFile = req.files.coverImage ? req.files.coverImage[0] : null;
+        const imagesFiles = req.files.images || [];
+        const product = await productService.createProduct(req.body , coverImageFile ,imagesFiles);
+        responses.created(res , `Product Created` , {product})
     } catch (error) {
-        res.status(500).json({
-            message: error.message
-        })
+        responses.serverError(res, error);
     }
 }
-
-exports.updateProduct = async (req, res) => {
+exports.updateProductBody = async (req, res) => {
     try {
-        const product = await Product.findByIdAndUpdate(
-            req.params.id,
-            req.body,
-            { new: true, runValidators: true }
-        )
-
-        if (!product) {
-            return res.status(400).json({
-                status: 'faild',
-                message: ' product not found'
-            })
-        }
-        res.status(200).json({
-            status: 'success',
-            message: 'product updated successfully',
-            Data: {
-                product
-            }
-        })
+        if(req.file) return responses.badRequest(res , `This End Point Is Only For Updating Body`);
+        if(!req.params.id || !req.body) return responses.badRequest(res , `Product Id And Body Is Required`);
+        const updatedProduct = await productService.updatedProductBody(req.params.id, req.body); 
+        responses.ok(res , `${updatedProduct.name} Body Updated` , {updatedProduct});
     } catch (error) {
-        res.status(500).json({
-            message: error.message
-        })
+        responses.serverError(res, error);
     }
 }
-
-exports.deleteProduct = async (req, res) => {
-    try {
-        const product = await Product.findByIdAndDelete(req.params.id)
-        if (!product) {
-            return res.status(400).json({
-                status: 'faild',
-                message: ' product not found'
-            })
-        }
-        res.status(200).json({
-            status: 'success',
-            message: 'product deleted successfully',
-        })
-    } catch (error) {
-        res.status(500).json({
-            message: error.message
-        })
-    }
-}
-
 exports.updateCoverImage = async (req, res) => {
     try {
-        if (!req.file) {
-            return res.status(400).json({
-                status: 'faild',
-                message: ' choose a file'
-            })
-        }
-        const product = await Product.findById(req.params.id);
-        if (!product) {
-            return res.status(400).json({
-                status: 'faild',
-                message: 'Product not found'
-            })
-        }
-        const oldImageUrl = path.join(__dirname, `../public${product.coverImage}`);
-        const newImageUrl = `/images/covers/${req.file.filename}`
-        product.coverImage = newImageUrl;
-        await product.save();
-        if (fs.existsSync(oldImageUrl)) {
-            fs.unlinkSync(oldImageUrl);
-        }
-        res.status(200).json({
-            message: 'cover image uploaded',
-            coverImage: req.file.filename
-        })
+        if(!req.params.id || !req.file) return responses.badRequest(res , `Bad Request`);
+        const updatedProduct = await productService.updateCoverImage(req.params.id , req.file);
+        responses.ok(res ,`product ${updatedProduct.name} updated` , {updatedProduct});
     } catch (error) {
-        res.status(500).json({
-            message: error.message
-        })
+        responses.serverError(res, error);
     }
 }
-
-exports.uploadProductImages = async (req, res) => {
+exports.updateProductImages = async (req, res) => {
     try {
-        if (!req.files) {
-            return res.status(400).json({
-                status: 'faild',
-                message: ' upload images'
-            })
-        }
-        const product = await Product.findById(req.params.id);
-        if (!product) {
-            return res.status(400).json({
-                status: 'faild',
-                message: ' product not found'
-            })
-        }
-        if (product.images) {
-            product.images.forEach(imagePath => {
-                fullPath = path.join(__dirname, `../public/${imagePath}`);
-                console.log(fullPath);    
-                if (fs.existsSync(fullPath)) {
-                    fs.unlinkSync(fullPath);
-                }
-            });
-        }
-        const newImagesUrls = req.files.map(file => `/images/products/${file.filename}`);
-        console.log(newImagesUrls);
-        
-        product.images = [...newImagesUrls];
-        await product.save();
-        res.status(201).json({
-            status: 'success',
-            message: 'the images uploaded successfully',
-            Data: {
-                newImagesUrls
-            }
-        })
+        if(!req.params.id || !req.files) return responses.badRequest(res , `Bad Request`);
+        const updatedProduct = await productService.updateProductImages(req.params.id , req.files);
+        responses.ok(res , `${updatedProduct.name} Images Updated ` ,{updatedProduct})
     } catch (error) {
-        res.status(500).json({
-            message: error.message
-        })
+        responses.serverError(res, error);
     }
-
+}
+exports.deleteProduct = async (req, res) => {
+    try {
+        if(!req.params.id) return responses.badRequest(res ,`Product Id Is Required`);
+        await productService.deleteProduct(req.params.id);
+        responses.ok(res , `Product Deleted` ,{});
+    } catch (error) {
+        responses.serverError(res, error);
+    }
 }

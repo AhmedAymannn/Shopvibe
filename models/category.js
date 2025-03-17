@@ -9,6 +9,7 @@ const categorySchema = new mongoose.Schema({
     },
     categoryType: { type: String, enum: ["Main", "Sub", "Sub-Sub"], required: true },
     parent: {type: mongoose.Schema.Types.ObjectId, ref: 'Category', default: null },
+    image :{type : String , required : true }
 }, { timeseries: true })
 const Category = mongoose.model('Category', categorySchema);
 module.exports = Category;
