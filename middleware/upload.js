@@ -3,7 +3,7 @@ const path = require('path');
 
 const storage = (folder) => multer.diskStorage({
     destination: function (req, file, cb) {
-        cb(null, path.join(__dirname, `../public/images/${folder}`));
+        cb(null, path.join(__dirname, `../public/${folder}`));
     },
     filename: function (req, file, cb) {
         // Convert original filename to lowercase, replace spaces with underscores, and remove special characters

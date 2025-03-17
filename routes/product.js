@@ -7,27 +7,16 @@ const upload = require('../middleware/upload')
 
 
 
-router.use('/:productId/reviews' , reviewRouter);
-
-
-// middlewere to handle the images
-router.patch('/coverImageUpload/:id',
-    authMiddleware.protectWithHeaders,
-    authMiddleware.restrictTo('admin'),
-    upload('covers').single('cover-image'),
-    productController.updateCoverImage
-)
-// upload the product images , max 3 images
-router.post('/uploadProductImages/:id',
-    authMiddleware.protectWithHeaders,
-    authMiddleware.restrictTo('admin'),
-    upload('products').array('product-images', 3),
-    productController.uploadProductImages);
+router.use('/:productId/reviews', reviewRouter);
 
 router.route('/')
     .get(productController.getProducts)
     .post(authMiddleware.protectWithHeaders,
         authMiddleware.restrictTo('admin'),
+        upload('products').fields([
+            { name: 'coverImage', maxCount: 1 },  
+            { name: 'images', maxCount: 5 }       
+        ]),
         productController.addProduct)
 
 router.route('/:id')
@@ -36,13 +25,25 @@ router.route('/:id')
 
     .patch(authMiddleware.protectWithHeaders,
         authMiddleware.restrictTo('admin'),
-        productController.updateProduct)
+        productController.updateProductBody)
 
     .delete(authMiddleware.protectWithHeaders,
         authMiddleware.restrictTo('admin'),
         productController.deleteProduct)
 
-// router.post('/uploadCoverImage/:id', productController.uploadCoverImage)
+router.patch('/coverImageUpdate/:id',
+    authMiddleware.protectWithHeaders,
+    authMiddleware.restrictTo('admin'),
+    upload('products').single('coverImage'),
+    productController.updateCoverImage
+)
+
+router.patch('/updateProductImages/:id',
+    authMiddleware.protectWithHeaders,
+    authMiddleware.restrictTo('admin'),
+    upload('products').array('images',5),
+    productController.updateProductImages
+)
 
 module.exports = router;
 

@@ -1,71 +1,60 @@
 const Brand = require('../models/brand');
-const Category = require('../models/category');
-const responses = require('../utils/responses');
+const imagesHelper = require('../utils/imagesHelper');
 
-exports.getBrands = async (res) => {
-    try {
-        const brands = await Brand.find();
-        responses.ok(res, 'All Brands', { Result: brands.length, brands });
-    } catch (error) {
-        return { error: error.message };
-    }
+// Create a new brand
+exports.createBrand = async (body, file) => {
+    const { name, category } = body;
+    if (!name || !category) throw new Error('Brand name, category , and image are required');
+    const brandImage = await imagesHelper.uploadSingleImage(file, 'brands');
+    const brand = await Brand.create({ name, category, image: brandImage });
+    return brand;
 };
 
-exports.getBrand = async (brandId, res) => {
-    try {
-        if (!brandId) return responses.badRequest(res, 'Add Brand Id In Parameter');
-        const brand = await Brand.findById(brandId);
-        if (!brand) return responses.notFound(res, 'Brand Not Found');
-        responses.ok(res, `${brand.name}`, { brand });
-    } catch (error) {
-        return { error: error.message };
-    }
+// Get all brands
+exports.getBrands = async () => {
+    const brands = await Brand.find();
+    if (!brands) throw new Error('Brands not found');
+    return brands;
 };
 
-exports.createBrand = async (body, res) => {
-    try {
-        const { name, category } = body;
-        if (!name || !category) return responses.badRequest(res, 'Complete request body: name and categoryId are required');    
-        const categoryExists  = await Category.findById(category);
-        if (!categoryExists ) return responses.notFound(res, 'Category not found');
-
-        const brand = await Brand.create({ name, category });
-        responses.created(res, 'Brand Created successfully', { brand });
-    } catch (error) {
-        return { error: error.message };
-    }
+// Get a single brand by ID
+exports.getBrand = async (brandId) => {
+    const brand = await Brand.findById(brandId);
+    if (!brand) throw new Error('Brand not found');
+    return brand;
 };
 
-exports.updateBrand = async (body,brandId, res) => {
-    try {
-        if (!brandId) return responses.badRequest(res, 'Brand ID is required');
-        const { name, category } = body;
-        if (!name && !category) return responses.badRequest(res, 'Provide at least one field to update');
-        if (name === null || name === "") {
-            return responses.badRequest(res, 'Name cannot be null or empty');
-        }
-        let updated = {};
-        if (name !== undefined) updated.name = name;
-        if (category !== undefined) updated.category = category;
-        const updatedBrand = await Brand.findByIdAndUpdate(
-            brandId,
-            updated,
-            { new: true, runValidators: true }
-        );
-        if (!updatedBrand) return responses.notFound(res, 'Brand Not Found');
-        responses.ok(res, 'Updated successfully', { updatedBrand });
-    } catch (error) {
-        return { error: error.message };
-    }
+// Update brand details (excluding image)
+exports.updateBrandBody = async (brandId, body) => {
+    const { name, category } = body;
+    const updatedBrand = await Brand.findByIdAndUpdate(
+        brandId,
+        { name, category },
+        { new: true, runValidators: true }
+    );
+    if (!updatedBrand) throw new Error('Brand not found');
+    return updatedBrand;
 };
 
-exports.DeleteBrand = async (brandId, res) => {
-    try {
-        if (!brandId) return responses.badRequest(res, 'Add The Id Of Brand To Parameter');
-        const brand = await Brand.findByIdAndDelete(brandId);
-        if (!brand) return responses.notFound(res, 'Brand Not Found');
-        responses.ok(res, 'Deleted successfully', {});
-    } catch (error) {
-        return { error: error.message };
-    }
+// Update brand image
+exports.updateBrandImage = async (brandId, file) => {
+    if (!file || !brandId) throw new Error('File and Brand ID are required');
+    const brand = await Brand.findById(brandId);
+    if (!brand) throw new Error(`Brand with ID ${brandId} not found`);
+    const oldImageUrl = brand.image;
+    const newImageUrl = await imagesHelper.updateSingleImage(file, 'brands', oldImageUrl);
+    brand.image = newImageUrl;
+    await brand.save();
+    return brand;
+};
+
+// Delete brand and its image
+exports.deleteBrand = async (brandId) => {
+    const brand = await Brand.findById(brandId);
+    if (!brand) throw new Error('Brand not found');
+
+    const imageUrl = brand.image;
+    await imagesHelper.deleteSingleImage('brands', imageUrl);
+    await brand.deleteOne();
+    return true;
 };

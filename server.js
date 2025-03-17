@@ -17,7 +17,7 @@ const Db_connection = require('./config/db')
 //middleweres
 app.use(express.json());
 // access the images via => {{root}}images/imageName
-app.use('/images', express.static(path.join(__dirname, 'public/images')));
+app.use('/public', express.static(path.join(__dirname, 'public')));
 // Routes
 app.use('/api/v1/ecommerce/products', productRoutes);
 app.use('/api/v1/ecommerce/users', userRoutes);
