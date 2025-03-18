@@ -3,7 +3,7 @@ const responses = require('../utils/responses');
 const authService = require('../services/authService')
 exports.SignUp = async (req, res) => {
     try {
-        const { token, user } = await authService.signUp(req.body, res);
+        const { token, user } = await authService.signUp(req.validatedData, res);
         jwtHelper.sendToken(token, 201, res);
     } catch (error) {
         responses.serverError(res, error);

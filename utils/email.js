@@ -1,6 +1,4 @@
-const nodemailer = require('nodemailer');
-
-
+const nodemailer = require('nodemailer'); 
 const transporter = nodemailer.createTransport({
     host: process.env.EMAIL_HOST,
     port: process.env.EMAIL_PORT,
@@ -10,10 +8,8 @@ const transporter = nodemailer.createTransport({
     }
 });
 const sendEmail = async (options) => {  
-
-
     const emailOptions = {
-        from: "suppteam_ecommerce.io.com",
+        from: "ShopVibe.io.com",
         to: options.email,
         subject: options.subject,
         text: options.message,

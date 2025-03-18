@@ -22,8 +22,6 @@ router.route('/:id')
     .delete(authMiddleware.protectWithHeaders,
         authMiddleware.restrictTo('admin'),
         brandController.deleteBrand);
-
-
 router.patch('/updateBrandImage/:id',
     authMiddleware.protectWithHeaders,
     authMiddleware.restrictTo('admin'),

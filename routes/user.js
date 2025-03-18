@@ -3,6 +3,7 @@ const router = express.Router();
 const userController = require('../controllers/user');
 const authController = require('../controllers/authentication')
 const authMiddleware = require('../middleware/authMiddleware')
+const validationMiddleware = require('../middleware/validation');
 //get all users 
 router.route('/')
     .get(authMiddleware.protectWithHeaders,
@@ -18,19 +19,26 @@ router.route('/:id')
     .get(authMiddleware.protectWithHeaders,
         authMiddleware.restrictTo('admin'),
         userController.getUser)
+
 router.route('/signUp')
-    .post(authController.SignUp)
+    .post(validationMiddleware.validateSignUpData , authController.SignUp)
+
 router.route('/login')
     .post(authController.login);
+
 router.route('/logout')
     .post(authMiddleware.protectWithHeaders,authController.logOut);
+
 router.route('/forgotPassword')
     .post(authController.forgotPassword);
+
 router.route('/resetPassword/:token')
     .patch(authController.resetPassword);
-// router.patch('/updateProfileImage/:id' ,
-//     upload('users').single('user-profile') , 
-//     userController.updateProfileImage)
+
+router.patch('/updateProfileImage/:id' ,
+    authMiddleware.protectWithHeaders,
+    upload('users').single('image') , 
+    userController.updateProfileImage)
 
 
 module.exports = router;

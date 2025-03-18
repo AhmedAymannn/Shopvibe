@@ -7,7 +7,7 @@ const reviewController = require('../controllers/review');
 
 //POST /api/v1/products/:productId/reviews
 router.route('/')
-    .get(authMiddleware.protectWithHeaders , reviewController.getAllReviewsForProduct)
+    .get(reviewController.getAllReviewsForProduct)
     .post(authMiddleware.protectWithHeaders , reviewController.createReviewOnProduct)
 // api/products/productId/reviews/my-reviews
 router.route('/me-reviews')
@@ -24,7 +24,5 @@ router.route('/global')
 //POST /api/v1/reviews/id
 router.route('/:reviewId')
     .get(authMiddleware.protectWithHeaders , reviewController.getReviewById)
-
-
 
 module.exports = router;

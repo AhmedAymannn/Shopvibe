@@ -15,8 +15,6 @@ exports.uploadImages = async (files, folder, maxImages) => {
 }
 
 exports.updateSingleImage = async (file, folder, oldImageUrl) => {
-    console.log(`inside image helper`);
-
     if (!file || !folder || !oldImageUrl) throw new Error('File ,Folder Name And oldUrl Is Required');
     // The path.basename() method returns the last portion of a path
     const oldImageName = path.basename(oldImageUrl);
