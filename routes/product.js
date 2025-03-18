@@ -20,8 +20,7 @@ router.route('/')
         productController.addProduct)
 
 router.route('/:id')
-    .get(authMiddleware.protectWithHeaders,
-        productController.getProduct)
+    .get(productController.getProduct)
 
     .patch(authMiddleware.protectWithHeaders,
         authMiddleware.restrictTo('admin'),

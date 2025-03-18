@@ -26,7 +26,6 @@ const userSchema = new mongoose.Schema({
         required: true,
         min: 8
     },
-    passwordChangedAt : Date,
     address: {
         street: String,
         city: String,
@@ -45,10 +44,17 @@ const userSchema = new mongoose.Schema({
     active: {
         type: Boolean,
         default: true
-    },
+    },   
+    image : {type : String , default : `public/default_image_.png`},
+    passwordChangedAt : Date,
     passwordResetToken : String,
     passwordResetExpires : Date ,
-}, { timestamps: true });
+
+}, { 
+    timestamps: true ,
+    toJSON: { virtuals: true }, 
+    toObject: { virtuals: true } 
+});
 
 userSchema.pre('save',async function (next) {
     if (!this.isModified('password')) return next(); 
@@ -72,7 +78,12 @@ userSchema.methods.createResetToken = async  function (){
     this.passwordResetExpires = Date.now() + 10 * 60 * 1000;
     await  this.save();
     return this.passwordResetToken ;
-
 }
+userSchema.pre(/^find/, function(next) {
+    this.populate('orders').populate('wishlist')
+        .select('-__v -createdAt -updatedAt -passwordChangedAt');
+    next();
+});
+
 const User = mongoose.model('User', userSchema);
 module.exports = User;

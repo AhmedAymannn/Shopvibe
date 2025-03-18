@@ -4,16 +4,8 @@ const crypto = require('crypto');
 const jwtHelper = require('../utils/jwt');
 const sendEmail = require('../utils/email');
 
-exports.signUp = async (body) => {
-    const { email, name, password, phone, address } = body;
-    const user = await User.create({
-        email,
-        name,
-        password,
-        phone,
-        address,
-        role: "customer"
-    });
+exports.signUp = async (validatedData) => {
+    const user = await User.create(validatedData);
     if (!user) throw new Error('User creation failed');
     const token = jwtHelper.creatJwt(user.id);
     await sendEmail({
