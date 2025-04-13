@@ -1,5 +1,5 @@
 # ShobVibe-api
-An advanced e-commerce backend API built using JavaScript, Express.js, and MongoDB. This project follows a clean architecture pattern with a dedicated service layer for business logic.
+An e-commerce backend API built using JavaScript, Express.js, and MongoDB. This project follows a clean architecture pattern with a dedicated service layer for business logic.
 
 Features
 
