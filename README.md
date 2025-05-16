@@ -92,4 +92,4 @@ The API documentation is available using Swagger UI. You can access it by runnin
 - **Swagger**: API documentation.
 
 ## License
-This project is licensed under the MIT License. 
+This project is copyrighted, and all rights are reserved. Unauthorized use, modification, or distribution is prohibited. 
