@@ -4,6 +4,7 @@ const userController = require('../controllers/user');
 const authController = require('../controllers/authentication')
 const authMiddleware = require('../middleware/authMiddleware')
 const validationMiddleware = require('../middleware/validation');
+const upload = require ('../middleware/upload');
 //get all users 
 router.route('/')
     .get(authMiddleware.protectWithHeaders,

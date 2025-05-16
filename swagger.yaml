@@ -1,0 +1,862 @@
+openapi: 3.0.0
+info:
+  title: E-commerce API
+  version: 1.0.0
+  description: API documentation for the e-commerce application
+servers:
+  - url: http://localhost:3000/api/v1/ecommerce
+    description: Local development server
+paths:
+  /products:
+    get:
+      summary: Get all products
+      description: Retrieve a list of all products.
+      responses:
+        '200':
+          description: A list of products
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Product'
+    post:
+      summary: Add a new product
+      description: Add a new product. Requires admin privileges.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                coverImage:
+                  type: string
+                  format: binary
+                images:
+                  type: array
+                  items:
+                    type: string
+                    format: binary
+      responses:
+        '201':
+          description: Product created successfully
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+  /products/{id}:
+    get:
+      summary: Get product by ID
+      description: Retrieve a specific product by its ID.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Product retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+    patch:
+      summary: Update product
+      description: Update a specific product. Requires admin privileges.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductUpdate'
+      responses:
+        '200':
+          description: Product updated successfully
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+    delete:
+      summary: Delete product
+      description: Delete a specific product. Requires admin privileges.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Product deleted successfully
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+  /products/coverImageUpdate/{id}:
+    patch:
+      summary: Update product cover image
+      description: Update the cover image of a specific product. Requires admin privileges.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                coverImage:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: Cover image updated successfully
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+  /products/updateProductImages/{id}:
+    patch:
+      summary: Update product images
+      description: Update the images of a specific product. Requires admin privileges.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                images:
+                  type: array
+                  items:
+                    type: string
+                    format: binary
+      responses:
+        '200':
+          description: Product images updated successfully
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+  /users:
+    get:
+      summary: Get all users
+      description: Retrieve a list of all users. Requires admin privileges.
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: A list of users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+  /users/me:
+    get:
+      summary: Get my profile
+      description: Retrieve the profile of the currently authenticated user.
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: User profile retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '401':
+          description: Unauthorized
+    patch:
+      summary: Update my profile
+      description: Update the profile of the currently authenticated user.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserUpdate'
+      responses:
+        '200':
+          description: Profile updated successfully
+        '401':
+          description: Unauthorized
+    delete:
+      summary: Delete my profile
+      description: Delete the profile of the currently authenticated user.
+      security:
+        - bearerAuth: []
+      responses:
+        '204':
+          description: Profile deleted successfully
+        '401':
+          description: Unauthorized
+  /users/{id}:
+    get:
+      summary: Get user by ID
+      description: Retrieve a user by their ID. Requires admin privileges.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: User retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+  /users/signUp:
+    post:
+      summary: Sign up a new user
+      description: Register a new user with the provided data.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserSignUp'
+      responses:
+        '201':
+          description: User created successfully
+        '400':
+          description: Bad request
+  /users/login:
+    post:
+      summary: Login user
+      description: Authenticate a user and return a JWT token.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserLogin'
+      responses:
+        '200':
+          description: Login successful
+        '401':
+          description: Unauthorized
+  /users/logout:
+    post:
+      summary: Logout user
+      description: Log out the currently authenticated user.
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Logout successful
+        '401':
+          description: Unauthorized
+  /users/forgotPassword:
+    post:
+      summary: Forgot password
+      description: Request a password reset link.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ForgotPassword'
+      responses:
+        '200':
+          description: Password reset link sent
+        '400':
+          description: Bad request
+  /users/resetPassword/{token}:
+    patch:
+      summary: Reset password
+      description: Reset the user's password using the provided token.
+      parameters:
+        - name: token
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResetPassword'
+      responses:
+        '200':
+          description: Password reset successful
+        '400':
+          description: Bad request
+  /users/updateProfileImage/{id}:
+    patch:
+      summary: Update profile image
+      description: Update the profile image of the specified user.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                image:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: Profile image updated successfully
+        '401':
+          description: Unauthorized
+  /cart/allcarts:
+    get:
+      summary: Get all carts
+      description: Retrieve a list of all carts. Requires admin privileges.
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: A list of carts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Cart'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+  /cart/mycart:
+    get:
+      summary: Get my cart
+      description: Retrieve the cart of the currently authenticated user.
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Cart retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Cart'
+        '401':
+          description: Unauthorized
+    delete:
+      summary: Delete all items in my cart
+      description: Delete all items in the cart of the currently authenticated user.
+      security:
+        - bearerAuth: []
+      responses:
+        '204':
+          description: All items deleted successfully
+        '401':
+          description: Unauthorized
+  /cart/mycart/{id}:
+    post:
+      summary: Add item to my cart
+      description: Add an item to the cart of the currently authenticated user.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CartItemAdd'
+      responses:
+        '200':
+          description: Item added successfully
+        '401':
+          description: Unauthorized
+    delete:
+      summary: Delete item from my cart
+      description: Delete an item from the cart of the currently authenticated user.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Item deleted successfully
+        '401':
+          description: Unauthorized
+  /cart/mycart/decrease/{id}:
+    delete:
+      summary: Decrease item quantity in my cart
+      description: Decrease the quantity of an item in the cart of the currently authenticated user.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Item quantity decreased successfully
+        '401':
+          description: Unauthorized
+  /categories:
+    get:
+      summary: Get all categories
+      description: Retrieve a list of all categories.
+      responses:
+        '200':
+          description: A list of categories
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Category'
+    post:
+      summary: Add a new category
+      description: Add a new category. Requires admin privileges.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                image:
+                  type: string
+                  format: binary
+      responses:
+        '201':
+          description: Category created successfully
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+  /categories/{id}:
+    get:
+      summary: Get category by ID
+      description: Retrieve a specific category by its ID.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Category retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Category'
+    patch:
+      summary: Update category
+      description: Update a specific category. Requires admin privileges.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CategoryUpdate'
+      responses:
+        '200':
+          description: Category updated successfully
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+    delete:
+      summary: Delete category
+      description: Delete a specific category. Requires admin privileges.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Category deleted successfully
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+  /categories/updateCategoryImage/{id}:
+    patch:
+      summary: Update category image
+      description: Update the image of a specific category. Requires admin privileges.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                image:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: Category image updated successfully
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+  /brands:
+    get:
+      summary: Get all brands
+      description: Retrieve a list of all brands.
+      responses:
+        '200':
+          description: A list of brands
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Brand'
+    post:
+      summary: Add a new brand
+      description: Add a new brand. Requires admin privileges.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                image:
+                  type: string
+                  format: binary
+      responses:
+        '201':
+          description: Brand created successfully
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+  /brands/{id}:
+    get:
+      summary: Get brand by ID
+      description: Retrieve a specific brand by its ID.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Brand retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Brand'
+    patch:
+      summary: Update brand
+      description: Update a specific brand. Requires admin privileges.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BrandUpdate'
+      responses:
+        '200':
+          description: Brand updated successfully
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+    delete:
+      summary: Delete brand
+      description: Delete a specific brand. Requires admin privileges.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Brand deleted successfully
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+  /brands/updateBrandImage/{id}:
+    patch:
+      summary: Update brand image
+      description: Update the image of a specific brand. Requires admin privileges.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                image:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: Brand image updated successfully
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+  /checkout:
+    post:
+      summary: Create checkout
+      description: Create a checkout session for payment. Requires authentication.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaymentCreate'
+      responses:
+        '200':
+          description: Checkout created successfully
+        '401':
+          description: Unauthorized
+  /checkout/success:
+    get:
+      summary: Payment success
+      description: Handle successful payment.
+      responses:
+        '200':
+          description: Payment successful
+  /checkout/cancel:
+    get:
+      summary: Payment cancel
+      description: Handle cancelled payment.
+      responses:
+        '200':
+          description: Payment cancelled
+components:
+  schemas:
+    Product:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        price:
+          type: number
+        coverImage:
+          type: string
+        images:
+          type: array
+          items:
+            type: string
+    ProductUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        price:
+          type: number
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        email:
+          type: string
+    UserUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+    UserSignUp:
+      type: object
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+        password:
+          type: string
+    UserLogin:
+      type: object
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+    ForgotPassword:
+      type: object
+      properties:
+        email:
+          type: string
+    ResetPassword:
+      type: object
+      properties:
+        password:
+          type: string
+    Cart:
+      type: object
+      properties:
+        id:
+          type: string
+        userId:
+          type: string
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/CartItem'
+    CartItem:
+      type: object
+      properties:
+        productId:
+          type: string
+        quantity:
+          type: number
+    CartItemAdd:
+      type: object
+      properties:
+        productId:
+          type: string
+        quantity:
+          type: number
+    Category:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        image:
+          type: string
+    CategoryUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+    Brand:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        image:
+          type: string
+    BrandUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+    PaymentCreate:
+      type: object
+      properties:
+        amount:
+          type: number
+        currency:
+          type: string 

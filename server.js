@@ -13,7 +13,14 @@ const orderRoutes = require('./routes/order');
 const brandRoutes = require('./routes/brand');
 const checkoutRoutes = require ('./routes/payment');
 const cookieParser = require('cookie-parser');
-const Db_connection = require('./config/db')
+const Db_connection = require('./config/db');
+const cors = require('cors');
+const swaggerUi = require('swagger-ui-express');
+const YAML = require('yamljs');
+const swaggerDocument = YAML.load('./swagger.yaml'); // Load your YAML file
+
+// Enable CORS for all routes
+app.use(cors());
 //middleweres
 app.use(express.json());
 // access the images via => {{root}}images/imageName
@@ -27,9 +34,10 @@ app.use('/api/v1/ecommerce/reviews', reviewRoutes);
 app.use('/api/v1/ecommerce/orders', orderRoutes);
 app.use('/api/v1/ecommerce/brands', brandRoutes);
 app.use('/api/v1/ecommerce/checkout', checkoutRoutes);
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 Db_connection.connectDB();
 app.listen(port, () => {
-    console.log('server is running on port 3000');
+    console.log(`Server is running on port ${port}`);
 })
 
 

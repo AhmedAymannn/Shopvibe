@@ -17,7 +17,7 @@ exports.sendToken = (token , statusCode , res)=>{
 
 exports.sendTokenCookie = (token , statusCode , res)=>{
     res.cookie('jwt',token,{
-        expires: new Date(Date.now() + 24 * 60 * 60 * 1000),//1 day
+        expires: new Date(Date.now() + 24 * 60 * 60 * 1000), //1 day
         httpOnly: true,// Prevent client-side JavaScript access
         // secure: true => when using https
     });
